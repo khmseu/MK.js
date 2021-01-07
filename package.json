@@ -1,0 +1,14 @@
+{
+  "name": "mkjs",
+  "version": "1.0.0",
+  "description": "A simple build system",
+  "main": "src/main.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Kai Henningsen",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node-dev": "^1.1.1"
+  }
+}
