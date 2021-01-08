@@ -4,6 +4,7 @@
   "description": "A simple build system",
   "main": "src/main.ts",
   "scripts": {
+    "build:dev": "tsnd src/main.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,6 +18,9 @@
   },
   "license": "ISC",
   "devDependencies": {
-    "ts-node-dev": "^1.1.1"
+    "@types/node": "^14.14.20",
+    "ts-node-dev": "^1.1.1",
+    "typescript": "^4.1.3",
+    "typescript-json-schema": "^0.47.0"
   }
 }
