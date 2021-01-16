@@ -6,27 +6,42 @@ import { readFile, stat, Stats } from "fs";
 import isAbsolute from "is-absolute";
 import { isArray, isFunction, isString } from "lodash";
 import { resolve } from "path";
-
+/**
+ */
 export default class Make extends EventEmitter {
-  targets: Record<string, Target> = Object.create(null);
-  workingDir: string = process.cwd();
-  extraArgs: never[] = [];
+  private targets: Record<string, Target> = {};
+  private workingDir: string = process.cwd();
+  private extraArgs: string[] = process.argv.slice(1);
   toAbsolute(target: string) {
     if (isPhony(target)) {
       return target;
     }
     return resolve(this.workingDir, target);
   }
-  cwd(newcwd?: string) {
-    if (newcwd === undefined) {
+  /**
+   * 
+   * Set baseDir to `path`, the `path` must be absolute path. Use `path.resolve()`
+if you need to. Any future call to `make.rule()` with non-absolute file path
+will be resolved based on this path.
+   *
+   * Get current baseDir if no argument.
+   * @param path 
+   */
+  baseDir(path?: string) {
+    if (path === undefined) {
       return this.workingDir;
     } else {
-      if (!isAbsolute(newcwd)) {
+      if (!isAbsolute(path)) {
         throw new Error("For clarity, please assign a absolute path to cwd");
       }
-      this.workingDir = newcwd;
+      this.workingDir = path;
     }
   }
+  /**
+   * Get a array of arguments that you passed when calling makejs from command line. 
+The first argument is the name of makejs command (typically 'makejs'), the second 
+argument is the target you are building. The rest are passed as-is.
+   */
   args() {
     return this.extraArgs;
   }
@@ -35,6 +50,46 @@ export default class Make extends EventEmitter {
       this.targets[target] = new Target();
     }
   }
+
+  /**
+   *
+   * create a rule for a `target` with `dependencies`, with `action` as its
+   * action.
+   *
+   * @param  target - A string represent the target.  if the string start with a
+   * colon `:` it is treated as a _phony_target_ otherwise the string is considered
+   * a file target, if the path is relative it will be resolved to absolute path
+   * based on `make.baseDir()` setting.
+   *
+   * @param  dependencies - A array of `string` represent the dependencies of this
+   * target.  if the string start with a colon `:` it is treated as a _phony_target_
+   * otherwise the string is considered a file target, if the path is relative it
+   * will be resolved to absolute path based on `make.baseDir()` setting.
+   *
+   * If you call `make.rule()` multiple times for a same target, the dependencies is
+   * the union of all dependencies.
+   *
+   * @param  action - A function will be called when the all of the dependencies are
+   * fulfilled and the target is being make. If action is never defined for a
+   * certain target, then when the target get executed it will do a no-op function.
+   * If a action is specified for a target and later specified again, the latter
+   * will overwrite the earlier definition.
+   *
+   * The function will receive three arguments:
+   *
+   * `done(err)` when the action is finished executing, you must call `done()`.
+   * Pass `err` if you got any.
+   *
+   * `target` is the absolute path of the target. If target is phony, will be the
+   * name of the target (with colon).
+   *
+   * `dependencies` is an array of absolute path of the _dependencies_ of the
+   * target.  the _dependencies_ is not guaranteed to have the same order as you
+   * provided to `make.rule()`, and any duplication is removed.
+   *
+   * @return  Brief description of the returning value here.
+   *
+   */
   rule(
     target: string | number,
     dependencies: string[],
@@ -79,6 +134,7 @@ export default class Make extends EventEmitter {
   }
   run(target: string, callback: ErrorFunction) {
     var makeInst = this;
+    console.log({ target, callback, makeInst });
 
     // validate input
     if (!isString(target))
@@ -316,9 +372,9 @@ type ActionFunction = (
 
 type CallbackFunction = (
   err: Optional<Error>,
-  targetStat: Optional<Stats>
+  targetStat?: Optional<Stats>
 ) => void;
 
-type ErrorFunction = (err: Optional<Error>) => void;
+type ErrorFunction = (err?: Optional<Error>) => void;
 
 type Optional<T> = T | null | undefined;
