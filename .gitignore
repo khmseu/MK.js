@@ -665,3 +665,6 @@ stuff/scons-3.0.1/script/scons-configure-cache
 stuff/scons-3.0.1/script/scons-time
 stuff/scons-3.0.1/script/scons.bat
 stuff/scons-3.0.1/script/sconsign
+build/main.js
+build/Make.js
+build/test.js
