@@ -2,16 +2,33 @@
 
 import { map } from "async";
 import { EventEmitter } from "events";
-import { readFile, stat, Stats } from "fs";
+import { access, stat, Stats } from "fs";
 import isAbsolute from "is-absolute";
 import { isArray, isFunction, isString } from "lodash";
 import { resolve } from "path";
+import { DEBUG, log } from "./Log";
+import { paths } from "./Paths";
+import { vars } from "./Variables";
+
 /**
  */
 export default class Make extends EventEmitter {
   private targets: Record<string, Target> = {};
   private workingDir: string = process.cwd();
   private extraArgs: string[] = process.argv.slice(1);
+  private vars_hash = vars;
+  constructor() {
+    super({ captureRejections: true });
+  }
+  var(name: string): string;
+  var(name: string, value: any): void;
+  var(name: string, value?: any) {
+    if (value === undefined) return this.vars_hash[name];
+    this.vars_hash[name] = value;
+  }
+  vars() {
+    return Object.keys(this.vars_hash);
+  }
   toAbsolute(target: string) {
     if (isPhony(target)) {
       return target;
@@ -23,14 +40,19 @@ export default class Make extends EventEmitter {
    * Set baseDir to `path`, the `path` must be absolute path. Use `path.resolve()`
 if you need to. Any future call to `make.rule()` with non-absolute file path
 will be resolved based on this path.
-   *
-   * Get current baseDir if no argument.
-   * @param path 
    */
+  baseDir(path: string): void;
+  /**
+   * Get current baseDir if no argument.
+   * @param path
+   */
+  baseDir(): string;
   baseDir(path?: string) {
+    if (DEBUG) log({ path });
     if (path === undefined) {
       return this.workingDir;
     } else {
+      path = resolve(path);
       if (!isAbsolute(path)) {
         throw new Error("For clarity, please assign a absolute path to cwd");
       }
@@ -47,6 +69,7 @@ argument is the target you are building. The rest are passed as-is.
   }
   initTarget(target: string) {
     if (!(target in this.targets)) {
+      if (DEBUG) log({ target });
       this.targets[target] = new Target();
     }
   }
@@ -134,7 +157,7 @@ argument is the target you are building. The rest are passed as-is.
   }
   run(target: string, callback: ErrorFunction) {
     var makeInst = this;
-    console.log({ target, callback, makeInst });
+    if (DEBUG) log({ target, callback, makeInst });
 
     // validate input
     if (!isString(target))
@@ -146,10 +169,7 @@ argument is the target you are building. The rest are passed as-is.
 
     target = makeInst.toAbsolute(target);
     if (!(target in makeInst.targets))
-      callback(
-        new Error(`No rule to make target '${target}'
-`)
-      );
+      callback(new Error(`No rule to make target '${target}'\n`));
 
     var fulfilled = new StringSet();
     var active = new StringSet();
@@ -158,17 +178,22 @@ argument is the target you are building. The rest are passed as-is.
 
     // find all the required targets
     function addDepsToRequiredTargets(target: string, parents: StringSet) {
+      if (DEBUG) log({ target, parents });
       if (parents.has(target)) {
         callback(new Error("Circular dependencies detected"));
         return;
       }
       requiredTargets.add(target);
       parents.add(target);
-      for (var deps in makeInst.targets[target].dependsOn) {
+      if (DEBUG) log({ requiredTargets, parents });
+      if (DEBUG) log({ target, dependsOn: makeInst.targets[target].dependsOn });
+      for (var deps of makeInst.targets[target].dependsOn) {
+        if (DEBUG) log({ deps });
         addDepsToRequiredTargets(deps, new StringSet(parents));
       }
     }
     addDepsToRequiredTargets(target, new StringSet());
+    if (DEBUG) log({ requiredTargets });
 
     process.on("beforeExit", processListener);
     makeInst.on("done", doneListener);
@@ -195,7 +220,10 @@ argument is the target you are building. The rest are passed as-is.
     }
 
     function runRecursive(target: string, callback: ErrorFunction) {
-      for (var t in requiredTargets.values()) {
+      if (DEBUG) log({ target, callback });
+      if (DEBUG) log({ requiredTargets });
+      for (var t of requiredTargets.values()) {
+        if (DEBUG) log({ t });
         if (
           active.has(t) ||
           fulfilled.has(t) ||
@@ -205,6 +233,7 @@ argument is the target you are building. The rest are passed as-is.
         }
 
         active.add(t);
+        if (DEBUG) log({ active });
 
         (function (t) {
           getStat(
@@ -292,7 +321,7 @@ argument is the target you are building. The rest are passed as-is.
             if (err === null) {
               fulfilled.add(t);
               if (!isPhony(t)) {
-                readFile(t, function (e) {
+                access(t, function (e) {
                   if (e !== null && e.code === "ENOENT") {
                     callback(
                       new Error(
@@ -344,13 +373,16 @@ class Target {
 
 export function getStat(target: string, callback: CallbackFunction) {
   if (isPhony(target)) {
+    if (DEBUG) log({ target: [null, null] });
     callback(null, null);
     return;
   }
   stat(target, function (err, stat) {
     if (err) {
+      if (DEBUG) log({ target: [err, null] });
       callback(err, null);
     } else {
+      if (DEBUG) log({ target: [null, stat] });
       callback(null, stat);
     }
   });
@@ -378,3 +410,5 @@ type CallbackFunction = (
 type ErrorFunction = (err?: Optional<Error>) => void;
 
 type Optional<T> = T | null | undefined;
+
+const _dummy = paths();

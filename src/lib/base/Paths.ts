@@ -1,29 +1,39 @@
-import { resolve } from "path";
+import { join, resolve } from "path";
+import { DEBUG, log } from "./Log";
+import { vars } from "./Variables";
 
 function evalTemplate(template: string, map: { [x: string]: string }) {
   return template.replace(/\$\{\w+\}/g, (match) => {
-    console.log("map ", match, " -> ", map[match.slice(2, -1)]);
+    if (DEBUG) log("map ", match, " -> ", map[match.slice(2, -1)]);
     return map[match.slice(2, -1)];
   });
 }
 
 function resolveAll(template: string) {
-  while (template.match(/\$\{\w+\}/)) template = evalTemplate(template, vars);
+  while (template.match(/\$\{\w+\}/))
+    template = evalTemplate(template, path_table);
   return resolve(template);
 }
 export function stage(sel: string) {
-  return resolveAll(vars.DEST + vars[sel]);
+  return resolveAll(join(path_table.DEST, path_table[sel]));
 }
 
 export function final(sel: string) {
-  return resolveAll(vars[sel]);
+  return resolveAll(path_table[sel]);
 }
 
-export function set_var(s: string, d: string) {
-  vars[s] = d;
+export function path(s: string, d: string): void;
+export function path(s: string): string;
+export function path(s: string, d?: string) {
+  if (d === undefined || d === null) return path_table[s];
+  path_table[s] = d;
 }
 
-const vars: {
+export function paths() {
+  return Object.keys(path_table).sort();
+}
+
+const path_table: {
   DEST: string;
   prefix: string;
   exec_prefix: string;
@@ -104,3 +114,5 @@ const vars: {
   man8ext: ".8",
   man9ext: ".9",
 };
+
+vars.PATH = path_table;

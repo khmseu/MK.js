@@ -3,7 +3,8 @@
 // import { cwd } from "process";
 // import { RuleObject } from "./RuleObject";
 
-import { stage } from "./Paths";
+import { log } from "./lib/base/Log";
+import { stage } from "./lib/base/Paths";
 
 // let top;
 
@@ -20,6 +21,6 @@ import { stage } from "./Paths";
 // }
 
 // main()
-//   .then(() => console.log("Ok"))
-//   .catch((e) => console.error(e));
-console.log(stage("lisp"));
+//   .then(() => log("Ok"))
+//   .catch((e) => error(e));
+log(stage("lisp"));
