@@ -6,8 +6,8 @@ export abstract class Target {
   public timestamp(): Date {
     return this._timestamp;
   }
-  protected set_timestamp() {
-    this._timestamp = new Date();
+  protected set_timestamp(ts = new Date()) {
+    this._timestamp = ts;
   }
   public name(): string {
     return this._name;

@@ -7,8 +7,8 @@ import isAbsolute from "is-absolute";
 import { isArray, isFunction, isString } from "lodash";
 import { resolve } from "path";
 import { DEBUG, log } from "./Log";
-import { paths } from "./Paths";
-import { vars } from "./Variables";
+import { paths } from "./oPaths";
+import { vars } from "./oVariables";
 
 /**
  */

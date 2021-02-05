@@ -1,5 +1,5 @@
-import { error, log } from "./lib/base/Log";
-import Make from "./lib/base/Make";
+import { error, log } from "./DependencyEngine/Log";
+import Make from "./DependencyEngine/oMake";
 
 const make = new Make();
 const vars: Record<string, any> = {};

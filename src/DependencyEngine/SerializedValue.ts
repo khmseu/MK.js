@@ -1,5 +1,5 @@
 export type SerializedValue = {
   name: string;
-  timestamp: number;
+  time_stamp: number;
   value: string;
 };

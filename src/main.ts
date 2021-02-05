@@ -3,8 +3,8 @@
 // import { cwd } from "process";
 // import { RuleObject } from "./RuleObject";
 
-import { log } from "./lib/base/Log";
-import { stage } from "./lib/base/Paths";
+import { log } from "./DependencyEngine/Log";
+import { stage } from "./DependencyEngine/oPaths";
 
 // let top;
 
