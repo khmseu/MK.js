@@ -1,9 +1,10 @@
 import { existsSync } from "fs";
 import { join, resolve } from "path";
-import { evalTemplate, vars } from "./oVariables";
+import { vars } from "./oVariables";
+import { interpolate } from "./evalTemplate";
 
 function resolveAll(template: string) {
-  template = evalTemplate(template);
+  template = interpolate(template);
   return resolve(template);
 }
 export function stage(sel: string) {
@@ -121,9 +122,9 @@ vars.PATH = path_table;
 vars.VPATH = ["${PATH.srcdir}"];
 
 export function source(sel: string) {
-  const fn = evalTemplate(sel);
+  const fn = interpolate(sel);
   for (const entry of vars.VPATH as string[]) {
-    const full = resolve(evalTemplate(entry), fn);
+    const full = resolve(interpolate(entry), fn);
     if (existsSync(full)) return full;
   }
   return resolve(fn);
