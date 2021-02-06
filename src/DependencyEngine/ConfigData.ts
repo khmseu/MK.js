@@ -1,8 +1,7 @@
-import { SerializedValue } from "./SerializedValue";
-import { resolve } from "path";
-import { map } from "async";
-import { log } from "./Log";
 import Database from "better-sqlite3";
+import { resolve } from "path";
+import { log } from "./Log";
+import { SerializedValue } from "./SerializedValue";
 
 let cfdb: ConfigData | null = null;
 export function configData() {

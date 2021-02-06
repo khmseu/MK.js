@@ -1,5 +1,4 @@
 import { Json } from "./Json";
-import { SerializedValue } from "./SerializedValue";
 import { Target } from "./Target";
 
 export class Variable extends Target {

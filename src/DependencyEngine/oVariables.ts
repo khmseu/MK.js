@@ -11,5 +11,3 @@ vars.PKG = {
   URL: "???",
   VERSION: "???",
 };
-
-

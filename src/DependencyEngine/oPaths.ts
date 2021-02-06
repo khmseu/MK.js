@@ -1,7 +1,7 @@
 import { existsSync } from "fs";
 import { join, resolve } from "path";
-import { vars } from "./oVariables";
 import { interpolate } from "./evalTemplate";
+import { vars } from "./oVariables";
 
 function resolveAll(template: string) {
   template = interpolate(template);
