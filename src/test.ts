@@ -1,3 +1,5 @@
+import Log = require("./DependencyEngine/Log");
+import { resolveVar } from "./DependencyEngine/evalTemplate";
 import { error, log } from "./DependencyEngine/Log";
 import Make from "./DependencyEngine/oMake";
 
@@ -21,3 +23,8 @@ const r = make.run("./build/test.js", (e) => {
   error({ e });
 });
 log({ r });
+
+//////////////////////////
+
+Log.DEBUG = true;
+resolveVar("bla.blubb[5][foo]");

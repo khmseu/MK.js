@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import { resolve } from "path";
 import { log } from "./Log";
 import { SerializedValue } from "./SerializedValue";
+import { throwError } from "./throwError";
 
 let cfdb: ConfigData | null = null;
 export function configData() {
@@ -19,8 +20,7 @@ class ConfigData {
   constructor() {
     const oaid = this.db.pragma("application_id");
     if (oaid === 0) this.db.pragma(`application_id=${myId}`);
-    else if (oaid !== myId)
-      throw new Error(`${this.fn} is not a MKfs config file`);
+    else if (oaid !== myId) throwError(`${this.fn} is not a MKfs config file`);
     const ouver = this.db.pragma("user_version");
     if (ouver < myVer) {
       this.db
@@ -35,7 +35,7 @@ class ConfigData {
         .run();
       this.db.pragma(`user_version=${myVer}`);
     } else if (ouver !== myVer)
-      throw new Error(`Cannot handle version ${ouver} of ${this.fn}`);
+      throwError(`Cannot handle version ${ouver} of ${this.fn}`);
   }
   lookup(s: string): SerializedValue | null {
     const v = this.db
