@@ -4,7 +4,7 @@ import { Target } from "./Target";
 export class Variable extends Target {
   private value_: Json = null;
   constructor(name_: string) {
-    super(name_, new Date());
+    super(name_);
   }
   value(): Json {
     return this.value_;

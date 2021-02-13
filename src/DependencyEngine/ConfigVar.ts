@@ -11,11 +11,11 @@ export class ConfigVar extends Variable {
       this.set_timestamp(new Date(sv.time_stamp));
     }
   }
-  set_value(value_: Json) {
+  async set_value(value_: Json) {
     super.set_value(value_);
     configData().save({
       name: this.name(),
-      time_stamp: this.timestamp().valueOf(),
+      time_stamp: (await this.timestamp()).valueOf(),
       value: JSON.stringify(this.value()),
     });
   }

@@ -1,19 +1,24 @@
-"use strict";
-
 import { map } from "async";
 import { EventEmitter } from "events";
-import { access, stat, Stats } from "fs";
+import { access, Stats } from "fs";
 import isAbsolute from "is-absolute";
 import { isArray, isFunction, isString } from "lodash";
 import { resolve } from "path";
-import { DEBUG, log } from "./Log";
-import { paths } from "./oPaths";
+import { DEBUG, log } from "../DependencyEngine/Log";
+import { ActionFunction } from "./ActionFunction";
+import { ErrorFunction } from "./ErrorFunction";
+import { getStat } from "./getStat";
+import { isPhony } from "./isPhony";
+import { Optional } from "./Optional";
+import { oTarget } from "./oTarget";
 import { vars } from "./oVariables";
+import { StringSet } from "./StringSet";
 
 /**
  */
+
 export default class Make extends EventEmitter {
-  private targets: Record<string, Target> = {};
+  private targets: Record<string, oTarget> = {};
   private workingDir: string = process.cwd();
   private extraArgs: string[] = process.argv.slice(1);
   private vars_hash = vars;
@@ -36,7 +41,7 @@ export default class Make extends EventEmitter {
     return resolve(this.workingDir, target);
   }
   /**
-   * 
+   *
    * Set baseDir to `path`, the `path` must be absolute path. Use `path.resolve()`
 if you need to. Any future call to `make.rule()` with non-absolute file path
 will be resolved based on this path.
@@ -60,8 +65,8 @@ will be resolved based on this path.
     }
   }
   /**
-   * Get a array of arguments that you passed when calling makejs from command line. 
-The first argument is the name of makejs command (typically 'makejs'), the second 
+   * Get a array of arguments that you passed when calling makejs from command line.
+The first argument is the name of makejs command (typically 'makejs'), the second
 argument is the target you are building. The rest are passed as-is.
    */
   args() {
@@ -70,7 +75,7 @@ argument is the target you are building. The rest are passed as-is.
   initTarget(target: string) {
     if (!(target in this.targets)) {
       if (DEBUG) log({ target });
-      this.targets[target] = new Target();
+      this.targets[target] = new oTarget();
     }
   }
 
@@ -354,61 +359,3 @@ argument is the target you are building. The rest are passed as-is.
     }
   }
 }
-
-class StringSet extends Set<string> {
-  isSubsetOf(other: StringSet) {
-    for (let elem of this) {
-      if (!other.has(elem)) {
-        return false;
-      }
-    }
-    return true;
-  }
-}
-
-class Target {
-  dependsOn: StringSet = new StringSet();
-  action: ActionFunction = noop;
-}
-
-export function getStat(target: string, callback: CallbackFunction) {
-  if (isPhony(target)) {
-    if (DEBUG) log({ target: [null, null] });
-    callback(null, null);
-    return;
-  }
-  stat(target, function (err, stat) {
-    if (err) {
-      if (DEBUG) log({ target: [err, null] });
-      callback(err, null);
-    } else {
-      if (DEBUG) log({ target: [null, stat] });
-      callback(null, stat);
-    }
-  });
-}
-
-export function isPhony(target: string) {
-  return target[0] === ":";
-}
-
-function noop(done: ErrorFunction) {
-  done(undefined);
-}
-
-type ActionFunction = (
-  done: ErrorFunction,
-  target: string,
-  dependencies: string[]
-) => void;
-
-type CallbackFunction = (
-  err: Optional<Error>,
-  targetStat?: Optional<Stats>
-) => void;
-
-type ErrorFunction = (err?: Optional<Error>) => void;
-
-type Optional<T> = T | null | undefined;
-
-const _dummy = paths();

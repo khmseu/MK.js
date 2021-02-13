@@ -1,10 +1,10 @@
-import { ConfigVar } from "./ConfigVar";
-import { EnvironmentVar } from "./EnvironmentVar";
-import { Json } from "./Json";
-import { DEBUG, log } from "./Log";
-import { TargetMap } from "./TargetMap";
-import { throwError } from "./throwError";
-import { Variable } from "./Variable";
+import { ConfigVar } from "../DependencyEngine/ConfigVar";
+import { EnvironmentVar } from "../DependencyEngine/EnvironmentVar";
+import { Json } from "../DependencyEngine/Json";
+import { DEBUG, log } from "../DependencyEngine/Log";
+import { TargetMap } from "../DependencyEngine/TargetMap";
+import { throwError } from "../DependencyEngine/throwError";
+import { Variable } from "../DependencyEngine/Variable";
 
 const word = "[a-zA-Z_][a-zA-Z_0-9]*";
 const num = "[-+]?\\d+";
@@ -29,23 +29,23 @@ export function resolveVar(text: string, toVar?: boolean): Variable | string {
   let v: Variable, vv: Json, vvv: Variable | string;
   switch (text[0]) {
     case "@":
-      v = TargetMap.global(text.substring(1), ConfigVar);
+      v = TargetMap.global(text.substring(1), ConfigVar)!;
       if (toVar) return v;
       vv = v.value();
       return String(vv);
       break;
     case "$":
-      v = TargetMap.global(text.substring(1), EnvironmentVar);
+      v = TargetMap.global(text.substring(1), EnvironmentVar)!;
       if (toVar) return v;
       vv = v.value();
       return String(vv);
       break;
     case ".":
-      vvv = resolveNormalVar(text.substring(1), GL.local);
+      vvv = resolveNormalVar(text.substring(1), GL.local)!;
       return vvv;
       break;
     default:
-      vvv = resolveNormalVar(text, GL.global);
+      vvv = resolveNormalVar(text, GL.global)!;
       return vvv;
       break;
   }
@@ -61,7 +61,7 @@ export function resolveVar(text: string, toVar?: boolean): Variable | string {
         ? TargetMap.local(matches[1], Variable)
         : throwError<Variable>(`Bad parameter '${gl}'`);
       if (toVar) return v;
-      let vv = v.value();
+      let vv = v!.value();
       if (DEBUG) log({ var: matches[1], val: vv });
       let tail = matches[2];
       while (tail) {

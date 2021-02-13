@@ -1,4 +1,7 @@
 export let DEBUG = false;
+export function setDEBUG(to: boolean) {
+  DEBUG = to;
+}
 
 function where(top: Function | undefined) {
   const err: { stack?: string } = {};

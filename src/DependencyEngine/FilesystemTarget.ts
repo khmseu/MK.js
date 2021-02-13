@@ -1,13 +1,18 @@
-import { statSync } from "fs";
+import { stat } from "fs/promises";
+import { oldestDate } from "./Constants";
 import { Target } from "./Target";
-import { throwError } from "./throwError";
 
 export class FilesystemTarget extends Target {
-  public timestamp() {
-    const st = statSync(this.name());
-    return st.mtime;
+  public async timestamp() {
+    try {
+      const st = await stat(this.name());
+      return st.mtime;
+    } catch (error) {
+      return oldestDate;
+    }
   }
   public set_timestamp() {
-    throwError("Not implemented for fs targets");
+    // throwError("Not implemented for fs targets");
+    // just ignore
   }
 }

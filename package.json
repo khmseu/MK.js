@@ -30,6 +30,7 @@
     "typescript-json-schema": "^0.47.0"
   },
   "dependencies": {
+    "aigle": "^1.14.1",
     "better-sqlite3": "^7.1.2",
     "is-absolute": "^0.1.7",
     "lodash": "^3.10.1"

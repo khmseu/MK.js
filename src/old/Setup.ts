@@ -1,4 +1,4 @@
-import { ArrayOrOne } from "./../../DependencyEngine/ArrayOrOne";
+import { ArrayOrOne } from "../DependencyEngine/ArrayOrOne";
 
 enum Flag {
   base,

@@ -1,6 +1,5 @@
 import { Variable } from "./Variable";
 
-
 export class EnvironmentVar extends Variable {
   constructor(name_: string) {
     super(name_);

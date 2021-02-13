@@ -1,12 +1,7 @@
-// import { readFile, realpath } from "fs/promises";
-// import { join } from "path";
-// import { cwd } from "process";
-// import { RuleObject } from "./RuleObject";
-
-import { log } from "./DependencyEngine/Log";
-import { stage } from "./DependencyEngine/oPaths";
-
 // let top;
+
+import { log } from "../DependencyEngine/Log";
+import { stage } from "./oPaths";
 
 // async function readRules(dirName: string) {
 //   const fullfn = join(dirName, "mk.json");
